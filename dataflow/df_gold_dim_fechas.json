@@ -13,13 +13,6 @@
 						"type": "DatasetReference"
 					},
 					"name": "source1"
-				},
-				{
-					"dataset": {
-						"referenceName": "ds_sql_silver_datos",
-						"type": "DatasetReference"
-					},
-					"name": "source2"
 				}
 			],
 			"sinks": [
@@ -62,23 +55,6 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> source1",
-				"source(output(",
-				"          fecha_inicio as timestamp,",
-				"          fecha_fin as timestamp,",
-				"          numero as string,",
-				"          imei as string,",
-				"          rbs_utilizada as string,",
-				"          celda as string,",
-				"          latitud as decimal(12,6),",
-				"          longitud as decimal(12,6),",
-				"          subidos as integer,",
-				"          descargados as integer,",
-				"          total as integer",
-				"     ),",
-				"     allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> source2",
 				"source1 select(mapColumn(",
 				"          fecha",
 				"     ),",
