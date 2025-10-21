@@ -1,0 +1,19 @@
+{
+	"name": "ds_sql_datos_silver",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sql_sw_entel",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Silver"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "silver",
+			"table": "datos"
+		}
+	}
+}
