@@ -53,7 +53,7 @@
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> source1",
 				"source1 derive(fecha_inicio = trim(fecha_inicio),",
-				"          fecha_fin = trim(fecha_inicio),",
+				"          fecha_fin = trim(fecha_fin),",
 				"          latitud = replace(\r",
 				"    split(\r",
 				"        replace(\r",
