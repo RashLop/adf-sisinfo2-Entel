@@ -36,7 +36,15 @@
 					"name": "numero"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_sql_hechos_datos",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
 			"transformations": [
 				{
 					"name": "lookup1"
@@ -111,30 +119,44 @@
 				"     pickup: 'any',",
 				"     broadcast: 'auto')~> lookup3",
 				"lookup3 select(mapColumn(",
-				"          fecha_inicio,",
-				"          fecha_fin,",
-				"          numero = source1@numero,",
-				"          imei = source1@imei,",
-				"          rbs_utilizada,",
-				"          celda = source1@celda,",
-				"          latitud = source1@latitud,",
-				"          longitud = source1@longitud,",
 				"          subidos,",
 				"          descargados,",
 				"          total,",
 				"          id_fecha,",
-				"          fecha,",
 				"          id_radiobase,",
-				"          radiobase,",
-				"          celda = radiobase@celda,",
-				"          latitud = radiobase@latitud,",
-				"          longitud = radiobase@longitud,",
-				"          id_numero,",
-				"          numero = numero@numero,",
-				"          imei = numero@imei",
+				"          id_numero",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1"
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id_datos as integer,",
+				"          subidos as integer,",
+				"          descargados as integer,",
+				"          total as integer,",
+				"          id_fecha_inicio as integer,",
+				"          id_fecha_fin as integer,",
+				"          id_numero as integer,",
+				"          id_radiobase as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          subidos,",
+				"          descargados,",
+				"          total,",
+				"          id_fecha_inicio = id_fecha,",
+				"          id_fecha_fin = id_fecha,",
+				"          id_radiobase,",
+				"          id_numero",
+				"     )) ~> sink1"
 			]
 		}
 	}
