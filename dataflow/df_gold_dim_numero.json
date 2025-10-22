@@ -1,0 +1,150 @@
+{
+	"name": "df_gold_dim_numero",
+	"properties": {
+		"folder": {
+			"name": "Gold"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_sql_silver_llamadas",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_sql_datos_silver",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_sql_gold_dim_numero",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "select1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "union1"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "select3"
+				},
+				{
+					"name": "union2"
+				},
+				{
+					"name": "aggregate1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          servicio as string,",
+				"          registro as string,",
+				"          numero_a as string,",
+				"          imei_a as string,",
+				"          rbs_utilizada_a as string,",
+				"          celda_a as string,",
+				"          latitud_a as decimal(12,6),",
+				"          longitud_a as decimal(12,6),",
+				"          numero_b as string,",
+				"          imei_b as string,",
+				"          rbs_utilizada_b as string,",
+				"          celda_b as string,",
+				"          latitud_b as decimal(12,6),",
+				"          longitud_b as decimal(12,6),",
+				"          fecha as timestamp,",
+				"          duracion as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source1",
+				"source(output(",
+				"          fecha_inicio as timestamp,",
+				"          fecha_fin as timestamp,",
+				"          numero as string,",
+				"          imei as string,",
+				"          rbs_utilizada as string,",
+				"          celda as string,",
+				"          latitud as decimal(12,6),",
+				"          longitud as decimal(12,6),",
+				"          subidos as integer,",
+				"          descargados as integer,",
+				"          total as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source2",
+				"source1 select(mapColumn(",
+				"          numero_a,",
+				"          numero_b,",
+				"          imei_a,",
+				"          imei_b",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 derive(numero = numero_a,",
+				"          imei = imei_a) ~> derivedColumn1",
+				"derivedColumn1 derive(numero = numero_b,",
+				"          imei = imei_b) ~> derivedColumn2",
+				"derivedColumn2, derivedColumn1 union(byName: true)~> union1",
+				"union1 select(mapColumn(",
+				"          numero,",
+				"          imei",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"source2 select(mapColumn(",
+				"          numero,",
+				"          imei",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select3",
+				"select3, select2 union(byName: true)~> union2",
+				"union2 aggregate(groupBy(numero),",
+				"     each(match(name!=\"numero\"), $$ = first($$))) ~> aggregate1",
+				"aggregate1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id_numero as integer,",
+				"          numero as string,",
+				"          imei as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          numero,",
+				"          imei",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}
