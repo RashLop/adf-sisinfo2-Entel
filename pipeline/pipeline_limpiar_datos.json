@@ -1,5 +1,5 @@
 {
-	"name": "pipeline_cargar_silver",
+	"name": "pipeline_limpiar_datos",
 	"properties": {
 		"activities": [
 			{
