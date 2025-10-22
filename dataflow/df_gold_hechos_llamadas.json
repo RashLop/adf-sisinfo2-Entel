@@ -50,7 +50,15 @@
 					"name": "source6"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_sql_hechos_llamadas",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
 			"transformations": [
 				{
 					"name": "lookup1"
@@ -160,13 +168,45 @@
 				"     broadcast: 'auto')~> lookup5",
 				"lookup5 select(mapColumn(",
 				"          duracion,",
+				"          id_servicio,",
 				"          id_registro,",
 				"          id_radiobase,",
 				"          id_fecha,",
 				"          id_numero",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1"
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id_llamada as integer,",
+				"          duracion as timestamp,",
+				"          id_servicio as integer,",
+				"          id_registro as integer,",
+				"          id_numera_a as integer,",
+				"          id_radiobase_a as integer,",
+				"          id_numero_b as integer,",
+				"          id_radiobase_b as integer,",
+				"          id_fecha as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          duracion,",
+				"          id_servicio,",
+				"          id_registro,",
+				"          id_numera_a = id_numero,",
+				"          id_radiobase_a = id_radiobase,",
+				"          id_numero_b = id_numero,",
+				"          id_radiobase_b = id_radiobase,",
+				"          id_fecha",
+				"     )) ~> sink1"
 			]
 		}
 	}
