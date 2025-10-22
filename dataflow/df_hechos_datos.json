@@ -1,0 +1,141 @@
+{
+	"name": "df_hechos_datos",
+	"properties": {
+		"folder": {
+			"name": "Gold"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_sql_datos_silver",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_sql_gold_dim_fechas",
+						"type": "DatasetReference"
+					},
+					"name": "fechas"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_sql_gold_dim_radiobase",
+						"type": "DatasetReference"
+					},
+					"name": "radiobase"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_sql_gold_dim_numero",
+						"type": "DatasetReference"
+					},
+					"name": "numero"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "lookup1"
+				},
+				{
+					"name": "lookup2"
+				},
+				{
+					"name": "lookup3"
+				},
+				{
+					"name": "select1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          fecha_inicio as timestamp,",
+				"          fecha_fin as timestamp,",
+				"          numero as string,",
+				"          imei as string,",
+				"          rbs_utilizada as string,",
+				"          celda as string,",
+				"          latitud as decimal(12,6),",
+				"          longitud as decimal(12,6),",
+				"          subidos as integer,",
+				"          descargados as integer,",
+				"          total as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source1",
+				"source(output(",
+				"          id_fecha as integer,",
+				"          fecha as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> fechas",
+				"source(output(",
+				"          id_radiobase as integer,",
+				"          radiobase as string,",
+				"          celda as string,",
+				"          latitud as decimal(12,6),",
+				"          longitud as decimal(12,6)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> radiobase",
+				"source(output(",
+				"          id_numero as integer,",
+				"          numero as string,",
+				"          imei as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> numero",
+				"source1, fechas lookup(fecha_inicio == fecha",
+				"     && fecha_fin == fecha,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup1",
+				"lookup1, radiobase lookup(rbs_utilizada == radiobase,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup2",
+				"lookup2, numero lookup(source1@numero == numero@numero,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup3",
+				"lookup3 select(mapColumn(",
+				"          fecha_inicio,",
+				"          fecha_fin,",
+				"          numero = source1@numero,",
+				"          imei = source1@imei,",
+				"          rbs_utilizada,",
+				"          celda = source1@celda,",
+				"          latitud = source1@latitud,",
+				"          longitud = source1@longitud,",
+				"          subidos,",
+				"          descargados,",
+				"          total,",
+				"          id_fecha,",
+				"          fecha,",
+				"          id_radiobase,",
+				"          radiobase,",
+				"          celda = radiobase@celda,",
+				"          latitud = radiobase@latitud,",
+				"          longitud = radiobase@longitud,",
+				"          id_numero,",
+				"          numero = numero@numero,",
+				"          imei = numero@imei",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1"
+			]
+		}
+	}
+}
